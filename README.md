@@ -13,16 +13,6 @@
 
 ---
 
-## 🔧 Installation
-
-1. Download `Path.jar`
-2. Place it into: `plugins/BetterGUI/addons`
-3. Restart the server or use:
-
-```bash
-/rlplugin
-```
-
 ---
 
 ## ⚙️ Configuration
@@ -53,20 +43,25 @@ template-paths:
 
 ---
 
-## 🛠 Commands
+## 🔧 Installation
 
-This addon does not register any new commands. It hooks into `/rlplugin` via the BetterGUI addon system.
+1. Download `Path.jar`
+2. Place it into: `plugins/BetterGUI/addons`
+3. Restart the server or use:
 
----
-
-## 👤 Author
-
-- **GIGABAIT**
-- [tensa.co.ua](https://tensa.co.ua)
-- Part of the **TensaCraft** ecosystem
+```bash
+/rlplugin
+```
 
 ---
 
-## 📄 License
+## 🧑‍💻 Author
+
+> Developed [GIGABAIT](https://github.com/gigabait93)  
+> Part of the **[TensaCraft](https://tensa.co.ua)** ecosystem
+
+---
+
+## 📜 License
 
 This project is licensed under the [MIT License](LICENSE)
