@@ -1,4 +1,4 @@
-name: Release
+name: Build and Release
 
 on:
   workflow_dispatch:
@@ -27,12 +27,18 @@ jobs:
       - name: ⚙️ Build with Maven
         run: mvn clean package -DskipTests
 
+      - name: 🧹 Keep only shaded JAR and rename
+        run: |
+          mkdir -p dist
+          mv target/*-shaded.jar dist/Path.jar
+
       - name: 📦 Upload Artifact to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.event.inputs.release_tag }}
           name: ${{ github.event.inputs.release_name }}
-          files: |
-            target/*.jar
+          files: dist/Path.jar
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
