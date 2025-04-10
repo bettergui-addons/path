@@ -3,6 +3,7 @@ package uk.gigabait.path;
 import me.hsgamer.bettergui.manager.MenuManager;
 import uk.gigabait.path.util.Config;
 import uk.gigabait.path.util.Log;
+import uk.gigabait.path.util.YmlWalker;
 
 import java.io.File;
 
@@ -17,19 +18,13 @@ public class MenuPath {
                 return;
             }
 
-            File[] files = path.listFiles((dir, name) -> name.endsWith(".yml"));
-            if (files == null || files.length == 0) {
-                Log.warn(expansion, " ⚠️   No yaml menu in: " + path.getAbsolutePath());
-                return;
-            }
-
-            for (File file : files) {
+            YmlWalker.walk(path).stream().filter(file -> file.getName().endsWith(".yml")).forEach(file -> {
                 try {
                     menuManager.registerMenu(file);
                 } catch (Exception e) {
-                    Log.error(expansion, " ❌   Error when registering menu: " + file.getName() + ": " + e.getMessage());
+                    Log.error(expansion, " ❌   Error registering menu: " + file.getName() + ": " + e.getMessage());
                 }
-            }
+            });
         });
     }
 }

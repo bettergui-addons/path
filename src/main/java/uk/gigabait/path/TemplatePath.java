@@ -3,6 +3,7 @@ package uk.gigabait.path;
 import me.hsgamer.bettergui.config.TemplateConfig;
 import uk.gigabait.path.util.Config;
 import uk.gigabait.path.util.Log;
+import uk.gigabait.path.util.YmlWalker;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -17,17 +18,19 @@ public class TemplatePath {
             setupMethod.setAccessible(true);
 
             Config.getTemplatePaths().stream().filter(path -> !path.equalsIgnoreCase("none")).map(path -> path.startsWith("/") || path.startsWith("\\") ? new File(path) : new File(expansion.getPlugin().getDataFolder(), path)).forEach(path -> {
-                if (path.exists() && path.isDirectory()) {
-                    try {
-                        setupMethod.invoke(templateConfig, path);
-                    } catch (Exception e) {
-                        Log.error(expansion, " ❌ Failed to load template from: " + path.getAbsolutePath() + ": " + e.getMessage());
-                    }
-                } else {
-                    Log.warn(expansion, " ⚠️ Missed (not found): " + path.getAbsolutePath());
+                if (!path.isDirectory()) {
+                    Log.warn(expansion, " ⚠️   Missed (not found): " + path.getAbsolutePath());
+                    return;
                 }
-            });
 
+                YmlWalker.walk(path).stream().filter(file -> file.getName().endsWith(".yml")).forEach(file -> {
+                    try {
+                        setupMethod.invoke(templateConfig, file);
+                    } catch (Exception e) {
+                        Log.error(expansion, " ❌ Failed to load template from: " + file.getAbsolutePath() + ": " + e.getMessage());
+                    }
+                });
+            });
         } catch (Exception e) {
             Log.error(expansion, " ❌ Error when accessing template setup method: " + e.getMessage());
         }
