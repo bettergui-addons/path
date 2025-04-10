@@ -35,4 +35,4 @@ jobs:
           files: |
             target/*.jar
         env:
-          GITHUB_TOKEN: ${{ secrets.GT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
