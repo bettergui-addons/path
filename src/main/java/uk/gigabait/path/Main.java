@@ -1,13 +1,14 @@
 package uk.gigabait.path;
 
 import me.hsgamer.bettergui.api.addon.GetPlugin;
-import me.hsgamer.bettergui.api.addon.Reloadable;
 import me.hsgamer.bettergui.api.addon.PostEnable;
+import me.hsgamer.bettergui.api.addon.Reloadable;
 import me.hsgamer.hscore.expansion.common.Expansion;
 import me.hsgamer.hscore.expansion.extra.expansion.DataFolder;
 import uk.gigabait.path.util.Config;
 
 public final class Main implements Expansion, Reloadable, DataFolder, GetPlugin, PostEnable {
+    private ReloadListener reloadListener;
 
     @Override
     public boolean onLoad() {
@@ -17,25 +18,30 @@ public final class Main implements Expansion, Reloadable, DataFolder, GetPlugin,
 
     @Override
     public void onEnable() {
-        TemplatePath.register(this);
-        MenuPath.register(this);
+        reloadListener = new ReloadListener(this);
+        reloadListener.register();
     }
 
     @Override
     public void onReload() {
-        Config.reload();
-        TemplatePath.register(this);
-        MenuPath.register(this);
+        scheduleRegistration();
     }
 
     @Override
     public void onDisable() {
+        if (reloadListener != null) {
+            reloadListener.unregister();
+            reloadListener = null;
+        }
         Config.clear();
     }
 
     @Override
     public void onPostEnable() {
-        // I do not know why but the right menu processing with a custom path is processed correctly after the plugin is reprinted
-        getPlugin().getServer().dispatchCommand(getPlugin().getServer().getConsoleSender(), "reloadplugin");
+        scheduleRegistration();
+    }
+
+    public void scheduleRegistration() {
+        PathRegistry.schedule(this);
     }
 }
