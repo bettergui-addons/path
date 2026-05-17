@@ -10,6 +10,7 @@
 - ✅ Load templates (`type: template`) from **custom folders**
 - ✅ Supports both **absolute** and **relative** paths
 - ✅ Ignores path if set to `none`
+- ✅ Compatible with Folia-style scheduling through BetterGUI
 
 ---
 

@@ -3,14 +3,11 @@ package uk.gigabait.path;
 import me.hsgamer.bettergui.config.TemplateConfig;
 import uk.gigabait.path.util.Config;
 import uk.gigabait.path.util.Log;
-import uk.gigabait.path.util.YmlWalker;
+import uk.gigabait.path.util.PathFiles;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 public final class TemplatePath {
@@ -34,15 +31,9 @@ public final class TemplatePath {
             return 0;
         }
 
-        List<String> configuredPaths = Config.getTemplatePaths();
-        if (configuredPaths.isEmpty()) {
-            return 0;
-        }
-
-        return configuredPaths.stream()
-                .map(path -> normalizePath(expansion, path))
-                .filter(path -> path != null)
-                .distinct()
+        return PathFiles.directories(expansion.getPlugin().getDataFolder(), Config.getTemplatePaths(),
+                        directory -> Log.warn(expansion, " ⚠️   Missed (not found): " + directory.getAbsolutePath()))
+                .stream()
                 .mapToInt(directory -> registerTemplatesInDirectory(expansion, templateConfig, method, directory))
                 .sum();
     }
@@ -79,54 +70,14 @@ public final class TemplatePath {
         }
     }
 
-    private static File resolvePath(Main expansion, String path) {
-        if (path.startsWith("/") || path.startsWith("\\")) {
-            return new File(path);
-        }
-        return new File(expansion.getPlugin().getDataFolder(), path);
-    }
-
-    private static File normalizePath(Main expansion, String raw) {
-        if (raw == null || raw.equalsIgnoreCase("none")) {
-            return null;
-        }
-
-        File directory = resolvePath(expansion, raw);
-        if (!directory.isDirectory()) {
-            Log.warn(expansion, " ⚠️   Missed (not found): " + directory.getAbsolutePath());
-            return null;
-        }
-
-        try {
-            return directory.getCanonicalFile();
-        } catch (IOException ignored) {
-            return directory;
-        }
-    }
-
     private static int registerTemplatesInDirectory(Main expansion, TemplateConfig templateConfig, Method method, File directory) {
         Set<String> processedFiles = new HashSet<>();
         int loaded = 0;
 
         Log.info(expansion, "📂   Scanning templates in: " + directory.getAbsolutePath());
 
-        for (File file : YmlWalker.walk(directory)) {
-            if (file == null) {
-                continue;
-            }
-
-            String name = file.getName().toLowerCase(Locale.ROOT);
-            if (!name.endsWith(".yml")) {
-                continue;
-            }
-
-            String uniqueKey = file.getAbsolutePath();
-            try {
-                uniqueKey = file.getCanonicalPath();
-            } catch (IOException ignored) {
-                // fallback to absolute path
-            }
-
+        for (File file : PathFiles.ymlFiles(directory)) {
+            String uniqueKey = PathFiles.canonicalKey(file);
             if (!processedFiles.add(uniqueKey)) {
                 continue;
             }
